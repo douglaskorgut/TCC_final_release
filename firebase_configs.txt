@@ -1,0 +1,9 @@
+{
+    "apiKey": "AIzaSyCp0RIPqODI_Zxsrfu48Yt087XD8orxXWg",
+    "authDomain": "tccfirstattempt.firebaseapp.com",
+    "databaseURL": "https://tccfirstattempt.firebaseio.com",
+    "projectId": "tccfirstattempt",
+    "storageBucket": "tccfirstattempt.appspot.com",
+    "messagingSenderId": "994487973781",
+    "serviceAccount": "./cred.json"
+}
