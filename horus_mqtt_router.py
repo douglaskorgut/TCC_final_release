@@ -35,29 +35,32 @@ class MqttRouter:
             self._mqttc.subscribe(self.SYSTEM_RECOGNIZE, 0)
 
     def mqtt_on_message(self, mqttc, obj, msg):
+        message_rec = msg.payload.decode("utf-8")
 
         if msg.topic == self.RESTART_SYSTEM_TOPIC:
-            if str(msg.payload) == 'true':
+            if str(message_rec) == "true":
                 self.restart_system = True
 
         if msg.topic == self.PUBLISH_IMAGE_TOPIC:
-            if str(msg.payload) == 'true':
+            if str(message_rec) == "true":
                 self.publish_image = True
 
         if msg.topic == self.RECORD_VIDEO_TOPIC:
-            if str(msg.payload) == 'true':
+            print("Recording video")
+            if str(message_rec) == "true":
                 self.record_video = True
 
         if msg.topic == self.RELEASE_VIDEO_TOPIC:
-            if str(msg.payload) == "true":
+            print("Releasing video")
+            if str(message_rec) == "true":
                 self.release_video = True
 
         if msg.topic == self.SYSTEM_UNRECOGNIZE:
-            if str(msg.payload) == 'true':
+            if str(message_rec) == "true":
                 self.unrecognize = True
 
         if msg.topic == self.SYSTEM_RECOGNIZE:
-            if str(msg.payload) == 'true':
+            if str(message_rec) == "true":
                 self.recognize = True
 
     def on_disconnect(self, client, userdata, rc):
@@ -84,7 +87,7 @@ class MqttRouter:
     def initialize(self):
         try:
             self._mqttc = mqtt.Client(transport='websockets')
-            self._mqttc.ws_set_options('ws')
+            self._mqttc.ws_set_options('/ws')
             self._mqttc.on_message = self.mqtt_on_message
             self._mqttc.on_connect = self.mqtt_on_connect
             self._mqttc.on_subscribe = self.mqtt_on_subscribe
@@ -99,7 +102,7 @@ class MqttRouter:
 
     def run(self):
         try:
-            self._mqttc.connect("test.mosquitto.org", 8080, 20)
+            self._mqttc.connect("horustcc.ddns.net", 15675, 20)
         except Exception as e:
             print('Error occured connecting do mosquitto broker')
             print(e)

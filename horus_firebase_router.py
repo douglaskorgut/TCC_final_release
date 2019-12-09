@@ -3,7 +3,6 @@ import sys
 import os
 import datetime
 import time
-import subprocess
 
 db_url = 'https://tccfirstattempt.firebaseio.com'
 storage_url = 'gs://tccfirstattempt.appspot.com'
@@ -26,19 +25,19 @@ class FirebaseManager:
             self.firebase_conn = pyr.initialize_app(configs)
             self.firebase_storage = self.firebase_conn.storage()
             self.firebase_db = self.firebase_conn.database()
-            self.user_watcher = self.firebase_db.child('last_user_logged').child('userLogged').stream(self.logged_user_watcher)
+            # self.user_watcher = self.firebase_db.child('last_user_logged').child('userLogged').stream(self.logged_user_watcher)
 
         except Exception:
             print("Error connecting to Firebase: " + Exception)
             sys.exit(1)
 
-    def stop_logged_user_watcher(self):
-        self.user_watcher.close()
+    # def stop_logged_user_watcher(self):
+    #     self.user_watcher.close()
 
-    def logged_user_watcher(self, message):
-        print(message["event"])  # put
-        print(message["path"])  # /-K7yGTTEp7O549EzTYtI
-        print(message["data"])  # {'title': 'Pyrebase', "body": "etc..."}
+    # def logged_user_watcher(self, message):
+    #     print(message["event"])  # put
+    #     print(message["path"])  # /-K7yGTTEp7O549EzTYtI
+    #     print(message["data"])  # {'title': 'Pyrebase', "body": "etc..."}
 
     def retrieve_recognizable_name_related_by_image_key(self):
         # Creates dict that has all users that have faces to recognize
@@ -131,17 +130,21 @@ class FirebaseManager:
             print("The file does not exist")
 
     def publish_taken_picture(self, user_key):
-        time.sleep(0.05)
-        self.firebase_db.child("publicacoes").child(user_key).push({"titulo": "Captura da camera", "data": str(datetime.datetime.now())})
-        data = self.firebase_db.child("publicacoes").child(user_key).order_by_key().limit_to_last(1).get()
-        for x in data.each():
-            imageName = x.key()
+        time.sleep(0.5)
+        print("Publishing image!")
+        try:
+            self.firebase_db.child("publicacoes").child(user_key).push({"titulo": "Captura da camera", "data": str(datetime.datetime.now())})
+            data = self.firebase_db.child("publicacoes").child(user_key).order_by_key().limit_to_last(1).get()
+            for x in data.each():
+                imageName = x.key()
 
-        self.firebase_storage.child("imagens/"+str(imageName)).put("./captured_pictures/pictureTaken.png")
-        if os.path.exists("./captured_pictures/pictureTaken.png"):
-            os.remove("./captured_pictures/pictureTaken.png")
-        else:
-            print("The file does not exist")
+            self.firebase_storage.child("imagens/"+str(imageName)).put("./captured_pictures/pictureTaken.png")
+            if os.path.exists("./captured_pictures/pictureTaken.png"):
+                os.remove("./captured_pictures/pictureTaken.png")
+            else:
+                print("The file does not exist")
+        except Exception as e:
+            print(e)
 
     def publish_recognized_faces(self, names_to_publish, user_key):
         time.sleep(0.05)

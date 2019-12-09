@@ -7,16 +7,6 @@ from horus_firebase_router import firebase_configs as configs
 import horus_mqtt_router
 import subprocess
 import sys
-from flask import Flask
-from flask_restful import Api
-
-app = Flask(__name__)
-api = Api(app)
-
-# TODO: Find why horus_main is not ending when ctrl-c is pressed (it keeps running - htop python to see)
-# TODO: Use flask to stream and monitore while streaming
-# TODO: Fix new user screen
-# TODO: THATS ALLLL
 
 
 class Main:
@@ -28,7 +18,7 @@ class Main:
 
         # Publisher settings
         self.publish_time_counter = time.time()
-        self.publish_interval = 5000  # Seconds
+        self.publish_interval = 10  # Seconds
         self.run_monitoring = True
 
         # Mqtt config
@@ -53,6 +43,7 @@ class Main:
         # Video control / Create video writer that writes .h264 videos -> will be transformed to .mp4
         self.fourcc = cv2.VideoWriter_fourcc(*'H264')
         self.video_recorder = cv2.VideoWriter('./captured_videos/output.h264', self.fourcc, 10, (640, 480))
+
 
     def start_recognition_system(self):
         # Get all user keys and their recognizable faces
@@ -156,6 +147,8 @@ class Main:
             face_locations = self.recognizer.find_faces_locations(rgb_frame)
             face_encodings = self.recognizer.find_encodings_on_frame(rgb_frame, face_locations)
 
+            print(face_locations)
+
             # See if the face is a match for the known face(s)
             recognized_face_indexes = []
             for face_encoding in face_encodings:
@@ -184,9 +177,9 @@ class Main:
                                 names_to_publish.append(recognized_name)
 
                         if names_to_publish:
-                                print("Publishing: ", names_to_publish, " on user: ", user_key)
-                                cv2.imwrite('./captured_pictures/pictureTaken.png', frame)
-                                self.fb_manager.publish_recognized_faces(names_to_publish, user_key)
+                            print("Publishing: ", names_to_publish, " on user: ", user_key)
+                            cv2.imwrite('./captured_pictures/pictureTaken.png', frame)
+                            self.fb_manager.publish_recognized_faces(names_to_publish, user_key)
                         else:
                             print("Publishing UKNOWN on user: ", user_key)
                             cv2.imwrite('./captured_pictures/pictureTaken.png', frame)
@@ -199,17 +192,17 @@ class Main:
         self.run_monitoring = False
 
 
-
-
 if __name__ == '__main__':
-    main = Main()
     try:
+        main = Main()
         main.start_monitoring()
     except KeyboardInterrupt:
         print("Cleaning references...")
         pass
+    except Exception as e:
+        print(e)
     finally:
-        main.fb_manager.stop_logged_user_watcher()
-        main.cam.release()
+        # main.fb_manager.stop_logged_user_watcher()
+        # main.cam.release()
         print('Done!')
         sys.exit(1)
