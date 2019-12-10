@@ -102,7 +102,7 @@ class MqttRouter:
 
     def run(self):
         try:
-            self._mqttc.connect("horustcc.ddns.net", 15675, 20)
+            self._mqttc.connect("test.mosquitto.org", 8080, 20)
         except Exception as e:
             print('Error occured connecting do mosquitto broker')
             print(e)
